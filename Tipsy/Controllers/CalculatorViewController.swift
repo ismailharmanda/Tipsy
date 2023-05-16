@@ -22,19 +22,24 @@ class CalculatorViewController: UIViewController {
     @IBOutlet weak var splitNumberLabel: UILabel!
     
     var currentPercentage:String?="10%"
+    var result:String?
+    var people:Double?
     
     
     @IBAction func tipChanged(_ sender: UIButton) {
         currentPercentage=sender.currentTitle!
         makeSelected(buttonText: currentPercentage!)
+        billTextField.endEditing(true)
     }
     @IBAction func stepValueChanged(_ sender: UIStepper) {
+        people=sender.value
+        splitNumberLabel.text=String(format: "%.0f", people!)
     }
     @IBAction func calculatePressed(_ sender: UIButton) {
         let percentage = Double(currentPercentage!.dropLast()) // "50" after dropping "%"
         let numericValue = percentage! / 100.0 // Convert to decimal (0.50)
-        let result = Double(Int(splitNumberLabel.text!)!) * numericValue
-        print(result)
+        result = String(format:"%.2f",(Double(billTextField.text!)! * numericValue+Double(billTextField.text!)!)/Double(splitNumberLabel.text!)!)
+        self.performSegue(withIdentifier: "goToResult",sender:self)
     }
     
     func makeSelected(buttonText:String){
@@ -52,5 +57,14 @@ class CalculatorViewController: UIViewController {
             twentyPctButton.isSelected=true
         }
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier=="goToResult"{
+            let destinationVC=segue.destination as! ResultsViewController
+            destinationVC.total = result
+    destinationVC.settings = "Split between \(String(format: "%.0f", people!)) people, with \(currentPercentage!) tip."
+        }
+    }
+
 }
 
